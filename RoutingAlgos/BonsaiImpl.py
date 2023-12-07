@@ -1,8 +1,6 @@
 # Based on https://gitlab.cs.univie.ac.at/ct-papers/fast-failover/-/blob/master/arborescences.py
 # - Modified to work on directed graphs (edmond to calculate number of arbs)
 
-
-# import igraph as ig
 import networkx as nx
 from heapq import heappush, heappop
 import random
@@ -80,12 +78,6 @@ def TestCut(g: nx.Graph, s: int, d: int) -> int:
     """
     return the edge connectivity of g between s and t
     """
-    '''
-    G_ig = ig.Graph(directed=g.is_directed())
-    G_ig.add_vertices(g.nodes)  # KEYERROR HERE
-    G_ig.add_edges(g.edges())
-    c = G_ig.edge_connectivity(s, d)
-    return c'''
     return nx.edge_connectivity(g, s, d)
 
 

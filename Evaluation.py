@@ -10,6 +10,7 @@ from Info import *
 import copy
 
 
+# region Aggregators
 class Aggregator:
     """
     Aggregator that aggregates a list of RouteBuild- and RoutingInfos to a single value for use in plotting.
@@ -55,35 +56,16 @@ class Aggregator:
         return self.name
 
 
-Hops = Aggregator(lambda build, route: route.hops,
-                  "Avg. hops", aggregate_func="average")
-Stretch = Aggregator(lambda build, route: route.stretch,
-                     "Avg. stretch", True, aggregate_func="average")
-Runtime = Aggregator(lambda build, route: build.runtime +
-                     route.runtime, "Avg. runtime [s]", aggregate_func="average")
-Packetloss = Aggregator(lambda build, route: not route.found,
-                        "% of packets lost", False, True, aggregate_func="ratio")
-FailedEdges = Aggregator(lambda build, route: len([1 for (u, v, d) in build.graph.edges(
-    data=True) if d["failed"]]), "failed edges", aggregate_func="average")
-EdgesUsable = Aggregator(lambda build, route: get_used_edges(
-    build), "% of edges usable in routing", aggregate_func="average")
-Loops = Aggregator(lambda build, route: route.loop,
-                   "% of infinite loops", aggregate_func="ratio")
-NumberOfArbs = Aggregator(lambda build, route: max([build.graph.get_edge_data(*edge)['attr'] for edge in build.graph.edges]), "number of arbs", aggregate_func="average")
-Possible = Aggregator(lambda build, route: route.possible, "%of cases where dest. is reachable", aggregate_func="ratio")
-
-UsedReverseRatio = Aggregator(
-    lambda build, route: route.additional['ReverseEdgesUsed'] > 0,  "% of routes using reverse edges", True, True, aggregate_func="ratio")
-UsedReverseAvg = Aggregator(
-    lambda build, route: route.additional['ReverseEdgesUsed'],  "reverse edges used", True, True, aggregate_func="average")
-
+# region Aggregator helper functions
 def usable_a_links(build: RouteBuildInfo, route) -> float:
-    num_alinks = len([e for e in build.graph.edges(data=True) if e[2]['link_type'] == "a-link"])
+    num_alinks = len([e for e in build.graph.edges(
+        data=True) if e[2]['link_type'] == "a-link"])
     if num_alinks != 0:
         return len([e for e in build.graph.edges(data=True) if e[2]['link_type'] == "a-link" and e[2]["normal_a_link"]])/num_alinks*100
     else:
         return 0
-    
+
+
 def a_links(build: RouteBuildInfo, route) -> float:
     num_edges = len(build.graph.edges)
     if num_edges != 0:
@@ -91,21 +73,26 @@ def a_links(build: RouteBuildInfo, route) -> float:
     else:
         return 0
 
+
 def down_links(build: RouteBuildInfo, route) -> float:
-    label_size, label, node_weight, down_links, A_links, up_links,_,_ = build.graph.graph["precomp"]
+    label_size, label, node_weight, down_links, A_links, up_links, _, _ = build.graph.graph[
+        "precomp"]
     num_edges = len(build.graph.edges)
     if num_edges != 0:
         return sum([len(s) for s in down_links.values()])/num_edges*100
     else:
         return 0
 
+
 def up_links(build: RouteBuildInfo, route) -> float:
-    label_size, label, node_weight, down_links, A_links, up_links,_,_ = build.graph.graph["precomp"]
+    label_size, label, node_weight, down_links, A_links, up_links, _, _ = build.graph.graph[
+        "precomp"]
     num_edges = len(build.graph.edges)
     if num_edges != 0:
         return sum([len(s) for s in up_links.values()])/num_edges*100
     else:
         return 0
+
 
 def routed_a_links(build: RouteBuildInfo, route: RoutingInfo) -> float:
     path = route.route_taken
@@ -114,7 +101,8 @@ def routed_a_links(build: RouteBuildInfo, route: RoutingInfo) -> float:
         return len([e for e in path if build.graph[e[0]][e[1]]["link_type"] == "a-link"])/path_len*100
     else:
         return 0
-    
+
+
 def routed_up_links(build: RouteBuildInfo, route: RoutingInfo) -> float:
     path = route.route_taken
     path_len = len(path)
@@ -123,6 +111,7 @@ def routed_up_links(build: RouteBuildInfo, route: RoutingInfo) -> float:
     else:
         return 0
 
+
 def routed_down_links(build: RouteBuildInfo, route: RoutingInfo) -> float:
     path = route.route_taken
     path_len = len(path)
@@ -130,15 +119,7 @@ def routed_down_links(build: RouteBuildInfo, route: RoutingInfo) -> float:
         return len([e for e in path if build.graph[e[0]][e[1]]["link_type"] == "down-link"])/path_len*100
     else:
         return 0
-
-UsableALinks = Aggregator(usable_a_links, "% of a-links usable", False, False, aggregate_func="average")
-ALinks = Aggregator(a_links, "a-link %", False, False, aggregate_func="average")
-DownLinks = Aggregator(down_links, "downlink %", False, False, aggregate_func="average")
-UpLinks = Aggregator(up_links, "uplink %", False, False, aggregate_func="average")
-ALinksRouted = Aggregator(routed_a_links, "% of routed edges being a-links", False, False, aggregate_func="average")
-DownLinksRouted = Aggregator(routed_down_links, "% of routed edges being down-links", False, False, aggregate_func="average")
-UpLinksRouted = Aggregator(routed_up_links, "% of routed edges being up-links", False, False, aggregate_func="average")
-
+    
 def get_used_edges(build: RouteBuildInfo) -> float:
     """
     % of edges actually usable in routing. Usable edges are edges where attr is != 0
@@ -147,7 +128,28 @@ def get_used_edges(build: RouteBuildInfo) -> float:
         return len([e for e in build.graph.edges(data=True) if e[2]['attr'] != 0])/len(build.graph.edges)*100
     except:
         return 0
+#endregion Aggregator helper functions
 
+Hops = Aggregator(lambda build, route: route.hops, "Avg. hops", aggregate_func="average")
+Stretch = Aggregator(lambda build, route: route.stretch, "Avg. stretch", True, aggregate_func="average")
+Runtime = Aggregator(lambda build, route: build.runtime + route.runtime, "Avg. runtime [s]", aggregate_func="average")
+Packetloss = Aggregator(lambda build, route: not route.found, "% of packets lost", False, True, aggregate_func="ratio")
+FailedEdges = Aggregator(lambda build, route: len([1 for (u, v, d) in build.graph.edges(data=True) if d["failed"]]), "failed edges", aggregate_func="average")
+EdgesUsable = Aggregator(lambda build, route: get_used_edges(build), "% of edges usable in routing", aggregate_func="average")
+Loops = Aggregator(lambda build, route: route.loop, "% of infinite loops", aggregate_func="ratio")
+NumberOfArbs = Aggregator(lambda build, route: max([build.graph.get_edge_data(*edge)['attr'] for edge in build.graph.edges]), "number of arbs", aggregate_func="average")
+Possible = Aggregator(lambda build, route: route.possible, "%of cases where dest. is reachable", aggregate_func="ratio")
+UsedReverseRatio = Aggregator(lambda build, route: route.additional['ReverseEdgesUsed'] > 0,  "% of routes using reverse edges", True, True, aggregate_func="ratio")
+UsedReverseAvg = Aggregator(lambda build, route: route.additional['ReverseEdgesUsed'],  "reverse edges used", True, True, aggregate_func="average")
+UsableALinks = Aggregator(usable_a_links, "% of a-links usable", False, False, aggregate_func="average")
+ALinks = Aggregator(a_links, "a-link %", False, False, aggregate_func="average")
+DownLinks = Aggregator(down_links, "downlink %", False, False, aggregate_func="average")
+UpLinks = Aggregator(up_links, "uplink %", False, False, aggregate_func="average")
+ALinksRouted = Aggregator(routed_a_links, "% of routed edges being a-links", False, False, aggregate_func="average")
+DownLinksRouted = Aggregator(routed_down_links, "% of routed edges being down-links", False, False, aggregate_func="average")
+UpLinksRouted = Aggregator(routed_up_links, "% of routed edges being up-links", False, False, aggregate_func="average")
+
+# endregion Aggregators
 
 def eval(iterations: int, x_attr: str, x_values: list[float], y_attrs: list[Aggregator], graph_gen: GraphGenerator, fail_gen: FailureGenerator, routing_algos: list[RoutingAlgo], draw=False, draw_route=False, filename=None):
     """
@@ -196,12 +198,6 @@ def eval(iterations: int, x_attr: str, x_values: list[float], y_attrs: list[Aggr
             except:
                 shortest = 0
             for algo_idx, algo in enumerate(routing_algos):
-                # Shortcut - use only if impossible attempts are ignored in used Aggregators
-                # if not possible:
-                # ri = RoutingInfo(False, -1, [])
-                # ri.possible = False
-                # results[algo_idx][x_ind].append(ri)
-                # continue
                 algo.set_kwarg(**{x_attr: x})
                 g_copy = copy.deepcopy(g)
                 start = time.time()
@@ -212,18 +208,13 @@ def eval(iterations: int, x_attr: str, x_values: list[float], y_attrs: list[Aggr
                     DrawGraph.draw(marked_g)
                 marked_g_copy = copy.deepcopy(marked_g)
                 start = time.time()
-                # try:   # Output graphs crashing the routing
                 routing_info = algo.route(marked_g_copy, s, d)
-                # except:
-                # print(s, d, list(g.edges))
-                # exit()
                 routing_info.runtime = time.time() - start
                 routing_info.possible = possible
                 routing_info.stretch = routing_info.hops - shortest
                 if draw_route:
                     DrawGraph.draw(marked_g, hops=routing_info.hops,
                                    routed_paths=routing_info.route_taken)
-                # check_routing(build_info, routing_info)
                 results[algo_idx][x_ind].append((build_info, routing_info))
         for algo_idx, algo in enumerate(routing_algos):
             for y_idx, y_attr in enumerate(y_attrs):
@@ -295,18 +286,7 @@ def eval_fr(iterations: int, x_attr: str, x_values: list[float], y_attrs: list[A
                 shortest = 0
             for algo_idx, algo in enumerate(routing_algos):
                 build_info = marked_graphs_xind[algo_idx]
-                #try:
                 routing_info = algo.route(build_info.graph, s, d)
-                '''except:
-                    fails = []
-                    for edge in build_info.graph.edges:
-                        data = build_info.graph.get_edge_data(*edge)
-                        if data['failed']:
-                            fails.append((edge[0], edge[1]))
-                    print(build_info.graph.edges())
-                    print(s)
-                    print(d)
-                    exit(fails)'''
                 routing_info.possible = possible
                 routing_info.stretch = routing_info.hops - shortest
                 results[algo_idx][x_ind].append((build_info, routing_info))

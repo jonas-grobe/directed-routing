@@ -4,7 +4,7 @@ Install: `pip install -r requirements.txt`
 Run: `py Experiments.py`
 
 Code partially based on:
-https://github.com/oliver306/TREE (Oliver Schweiger, Klaus-Tycho Foerster, Stefan Schmid)
+https://github.com/oliver306/TREE (Oliver Schweiger, Klaus-Tycho Foerster, Stefan Schmid)  
 https://gitlab.cs.univie.ac.at/ct-papers/fast-failover/-/tree/master (Klaus-Tycho Foerster, Andrzej Kamisinski, Yvonne-Anne Pignolet, Stefan Schmid, Gilles Tredan)
 
 # Graph Generation
@@ -36,9 +36,9 @@ def n_random_failure(g: nx.Graph, **kwargs):
 # Routing Algorithms
 Implemented as class inheriting RoutingAlgo:
 ```python
-build_routes(self, g: nx.Graph, s: int, d: int) -> RouteBuildInfo - Routing precomputation, mark routes in the graph
-route(self, marked_g: nx.Graph, s: int, d: int) -> RoutingInfo - Simulate routing and return results
-get_name(self) -> str - The name of the algorithm (used in plots)
+build_routes(self, g: nx.Graph, s: int, d: int) -> RouteBuildInfo # Routing precomputation, mark routes in the graph
+route(self, marked_g: nx.Graph, s: int, d: int) -> RoutingInfo # Simulate routing and return results
+get_name(self) -> str # The name of the algorithm (used in plots)
 ```
 `RouteBuildInfo` and `RoutingInfo` can be found in Info.py
 
@@ -48,7 +48,7 @@ Aggregators transform routing results into the final plot y-axis values.
 Hops = Aggregator(lambda build, route: route.hops, "Avg. hops", aggregate_func="average")
 Packetloss = Aggregator(lambda build, route: not route.found, "% of packets lost", False, True, aggregate_func="ratio")
 ```
-First optional bool arg: ignore failed routing attempts
+First optional bool arg: ignore failed routing attempts  
 Second optional bool arg: ignore routing attempts where destination was unreachable
 
 # Evaluation

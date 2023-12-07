@@ -69,6 +69,7 @@ def erdos_renyi(**kwargs) -> tuple[int, int, nx.DiGraph]:
     s, d = random.sample(nodes, 2)
     return s, d, g
 
+
 @graph_gen
 @require_args(["n", "area", "min_range", "max_range"])
 def wireless(**kwargs) -> tuple[int, int, nx.DiGraph]:
@@ -80,12 +81,12 @@ def wireless(**kwargs) -> tuple[int, int, nx.DiGraph]:
     area = kwargs.get("area")
     send_range = (kwargs.get("min_range"), kwargs.get("max_range"))
     g = nx.DiGraph()
-    
+
     for node in range(n):
         x = random.uniform(0, area)
         y = random.uniform(0, area)
         g.add_node(node, pos=(x, y), sending_range=random.uniform(*send_range))
-    
+
     nodes = list(g.nodes)
 
     for u in nodes:
@@ -96,9 +97,10 @@ def wireless(**kwargs) -> tuple[int, int, nx.DiGraph]:
                 distance = math.sqrt((pos_u[0] - pos_v[0]) ** 2 + (pos_u[1] - pos_v[1]) ** 2)
                 if distance <= g.nodes[u]['sending_range']:
                     g.add_edge(u, v)
-    
+
     s, d = random.sample(nodes, 2)
     return s, d, g
+
 
 @graph_gen
 @require_args(["n", "d"])

@@ -220,13 +220,6 @@ def KeepForwardingRouting(s: int, d: int, g: nx.Graph) -> tuple[bool, int, list[
             # probably a loop, return
             return (False, hops, detour_edges)
         incoming_link = (s, nxt)
-        # Testing
-        '''if not g.has_edge(s, nxt):
-            print("USED nonexisting EDGE")
-            exit()
-        if (s, nxt) in fails:
-            print("USED FAILED EDGE")
-            exit()'''
         incoming_node = s
         s = nxt
     return (True, hops, detour_edges)

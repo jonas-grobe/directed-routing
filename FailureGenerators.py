@@ -58,6 +58,7 @@ def no_failure(g: nx.Graph, **kwargs) -> list[tuple[int, int]]:
     """
     return []
 
+
 @failure_gen
 @require_args(["failures"])
 def fixed_failure(g: nx.Graph, **kwargs) -> list[tuple[int, int]]:
@@ -85,9 +86,9 @@ def random_failure(g: nx.Graph, **kwargs) -> list[tuple[int, int]]:
 
     failed_edges = random.sample(list(g.edges()), edges_to_fail)
     if undir_fail and g.is_directed():
-        for (u,v) in failed_edges.copy():
-            if g.has_edge(v,u):
-                failed_edges.append((v,u))
+        for (u, v) in failed_edges.copy():
+            if g.has_edge(v, u):
+                failed_edges.append((v, u))
     return failed_edges
 
 
@@ -134,7 +135,7 @@ def clustered_failure(g: nx.Graph, **kwargs) -> list[tuple[int, int]]:
         incidents = next_incidents
         failurePercent -= failure_drop
     if undir_fail and g.is_directed():
-        for (u,v) in failed_edges.copy():
-            if g.has_edge(v,u):
-                failed_edges.append((v,u))
+        for (u, v) in failed_edges.copy():
+            if g.has_edge(v, u):
+                failed_edges.append((v, u))
     return failed_edges
